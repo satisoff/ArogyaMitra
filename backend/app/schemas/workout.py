@@ -11,6 +11,16 @@ class WorkoutDayPlan(BaseModel):
     focus: str
     location: str
     duration_minutes: int
+    exercises: list[str]
+    blocks: list[WorkoutBlock]
+
+
+class WorkoutAdaptations(BaseModel):
+    travel_applied: bool
+    injury_applied: bool
+    low_time_applied: bool
+
+
     blocks: list[WorkoutBlock]
 
 
@@ -21,3 +31,4 @@ class WorkoutPlanResponse(BaseModel):
     workout_location: str
     days: list[WorkoutDayPlan]
     ai_outline: dict
+    adaptations: WorkoutAdaptations

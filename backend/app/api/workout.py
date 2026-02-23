@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
@@ -13,6 +13,9 @@ router = APIRouter(prefix="/workout", tags=["Workout Planner"])
 
 @router.post("/generate", response_model=WorkoutPlanResponse)
 def generate_workout(
+    travel: bool = Query(default=False),
+    injury: bool = Query(default=False),
+    low_time: bool = Query(default=False),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -23,4 +26,9 @@ def generate_workout(
             detail="Health profile not found. Please create profile first.",
         )
 
-    return generate_workout_plan(user=current_user, profile=profile)
+    context_flags = {
+        "travel": travel,
+        "injury": injury,
+        "low_time": low_time,
+    }
+    return generate_workout_plan(user=current_user, profile=profile, context_flags=context_flags)

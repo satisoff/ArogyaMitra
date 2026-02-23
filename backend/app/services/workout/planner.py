@@ -1,6 +1,20 @@
 from app.models.health_profile import HealthProfile
 from app.models.user import User
 from app.services.ai.planner import generate_ai_workout_outline
+from app.services.workout.adaptive_engine import adapt_workout_plan
+
+
+def _exercise_library(focus: str) -> list[str]:
+    catalog = {
+        "Full Body Strength": ["Barbell Squats", "Bench Press", "Cable Rows"],
+        "Cardio + Core": ["Treadmill Intervals", "Mountain Climbers", "Plank Hold"],
+        "Lower Body Strength": ["Deadlifts", "Leg Press", "Jump Squats"],
+        "Mobility + Recovery": ["Hip Mobility Flow", "Thoracic Rotations", "Breathing Drills"],
+        "Upper Body Strength": ["Bench Press", "Lat Pulldown", "Overhead Press"],
+        "HIIT Conditioning": ["Burpees", "Sprint Intervals", "Box Jumps"],
+        "Active Recovery Walk": ["Brisk Walk", "Gentle Stretching", "Foam Rolling"],
+    }
+    return catalog.get(focus, ["Bodyweight Squats", "Push-Ups", "Plank Hold"])
 
 
 def _workout_for_day(day_index: int, location: str, minutes: int) -> dict:
@@ -22,6 +36,7 @@ def _workout_for_day(day_index: int, location: str, minutes: int) -> dict:
         "focus": focus,
         "location": location,
         "duration_minutes": minutes,
+        "exercises": _exercise_library(focus),
         "blocks": [
             {"name": "Warm-up", "minutes": warmup},
             {"name": "Main Session", "minutes": main_session},
@@ -53,7 +68,7 @@ def generate_workout_plan(user: User, profile: HealthProfile) -> dict:
         )
         workout_days.append({"day": day_name, **day_plan})
 
-    return {
+    base_plan = {
         "user_id": user.id,
         "goal": user.fitness_goal or "general_fitness",
         "activity_level": profile.activity_level,
@@ -61,3 +76,4 @@ def generate_workout_plan(user: User, profile: HealthProfile) -> dict:
         "days": workout_days,
         "ai_outline": ai_outline,
     }
+    return adapt_workout_plan(base_plan=base_plan, profile=profile, context_flags=context_flags)
