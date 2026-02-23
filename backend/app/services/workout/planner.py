@@ -45,12 +45,8 @@ def _workout_for_day(day_index: int, location: str, minutes: int) -> dict:
     }
 
 
-def generate_workout_plan(
-    user: User,
-    profile: HealthProfile,
-    context_flags: dict | None = None,
-) -> dict:
-    """Generate and adapt a structured 7-day workout plan using modular mock logic."""
+def generate_workout_plan(user: User, profile: HealthProfile) -> dict:
+    """Generate a structured 7-day workout plan using mock logic for now."""
     ai_outline = generate_ai_workout_outline(user=user, profile=profile)
 
     workout_days = []
