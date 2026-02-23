@@ -21,6 +21,9 @@ class WorkoutAdaptations(BaseModel):
     low_time_applied: bool
 
 
+    blocks: list[WorkoutBlock]
+
+
 class WorkoutPlanResponse(BaseModel):
     user_id: int
     goal: str
