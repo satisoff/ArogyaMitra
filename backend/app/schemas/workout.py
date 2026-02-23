@@ -19,9 +19,7 @@ class WorkoutAdaptations(BaseModel):
     travel_applied: bool
     injury_applied: bool
     low_time_applied: bool
-
-
-    blocks: list[WorkoutBlock]
+    blocks: list[WorkoutBlock] | None = None
 
 
 class WorkoutPlanResponse(BaseModel):
