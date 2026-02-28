@@ -13,6 +13,7 @@ class WorkoutDayPlan(BaseModel):
     duration_minutes: int
     exercises: list[str]
     blocks: list[WorkoutBlock]
+    videos: list[dict] | None = None
 
 
 class WorkoutAdaptations(BaseModel):

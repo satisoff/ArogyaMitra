@@ -31,4 +31,5 @@ def generate_workout(
         "injury": injury,
         "low_time": low_time,
     }
+    # print("Profile Injury Debug: ", profile.injuries);
     return generate_workout_plan(user=current_user, profile=profile, context_flags=context_flags)

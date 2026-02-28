@@ -4,7 +4,7 @@ from app.models.health_profile import HealthProfile
 from app.models.user import User
 
 
-def build_workout_prompt(user: User, profile: HealthProfile) -> str:
+def build_workout_prompt(user: User, profile: HealthProfile, extra_context=None) -> str:
     """Build a structured JSON request prompt for workout outline generation."""
     request_payload = {
         "task": "generate_structured_workout_outline",
@@ -15,6 +15,7 @@ def build_workout_prompt(user: User, profile: HealthProfile) -> str:
             "available_minutes_per_day": profile.available_minutes_per_day,
             "injuries": profile.injuries or "none",
         },
+        "extra_context": extra_context or {},
         "response_schema": {
             "summary": "string",
             "days": [

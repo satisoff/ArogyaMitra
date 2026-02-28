@@ -42,9 +42,9 @@ def _mock_outline(user: User, profile: HealthProfile) -> dict:
     }
 
 
-def generate_ai_workout_outline(user: User, profile: HealthProfile) -> dict:
+def generate_ai_workout_outline(user: User, profile: HealthProfile, extra_context=None) -> dict:
     """Generate structured outline via Groq with safe fallback behavior."""
-    prompt = build_workout_prompt(user=user, profile=profile)
+    prompt = build_workout_prompt(user=user, profile=profile, extra_context=extra_context)
 
     try:
         outline = generate_structured_workout_outline(prompt)

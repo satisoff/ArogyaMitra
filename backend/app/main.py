@@ -3,6 +3,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 
+from app.api.aromi import router as aromi_router
 from app.api.auth import router as auth_router
 from app.api.profile import router as profile_router
 from app.api.workout import router as workout_router
@@ -16,7 +17,7 @@ app = FastAPI(title="ArogyaMitra AI Wellness API")
 app.include_router(auth_router)
 app.include_router(profile_router)
 app.include_router(workout_router)
-
+app.include_router(aromi_router)
 
 @app.get("/")
 def root():
