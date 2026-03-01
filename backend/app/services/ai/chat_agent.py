@@ -1,5 +1,5 @@
 import json
-from app.services.ai.groq_client import generate_structured_workout_outline
+from app.services.ai.groq_client import call_groq_json
 from app.services.workout.planner import generate_workout_plan
 
 
@@ -20,7 +20,7 @@ def detect_intent_with_ai(message: str) -> dict:
     """
 
     try:
-        result = generate_structured_workout_outline(prompt)
+        result = call_groq_json(prompt)
         return {
             "travel": result.get("travel", False),
             "injury": result.get("injury", False),

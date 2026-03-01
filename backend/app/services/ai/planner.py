@@ -2,7 +2,7 @@ import logging
 
 from app.models.health_profile import HealthProfile
 from app.models.user import User
-from app.services.ai.groq_client import generate_structured_workout_outline
+from app.services.ai.groq_client import call_groq_json
 from app.services.ai.prompt_builder import build_workout_prompt
 
 logger = logging.getLogger(__name__)
@@ -47,13 +47,12 @@ def generate_ai_workout_outline(user: User, profile: HealthProfile, extra_contex
     prompt = build_workout_prompt(user=user, profile=profile, extra_context=extra_context)
 
     try:
-        outline = generate_structured_workout_outline(prompt)
-        if not _is_valid_outline(outline):
-            logger.warning("Groq outline validation failed; using fallback outline")
+        outline = call_groq_json(prompt)
+    except Exception as exc:  # noqa: BLE001 - intentional safe fallback
+        return _mock_outline(user=user, profile=profile)
+    
+    if not _is_valid_outline(outline):
             return _mock_outline(user=user, profile=profile)
 
-        outline["source"] = "groq"
-        return outline
-    except Exception as exc:  # noqa: BLE001 - intentional safe fallback
-        logger.warning("Groq call failed, using fallback outline: %s", exc)
-        return _mock_outline(user=user, profile=profile)
+    outline["source"] = "groq"
+    return outline

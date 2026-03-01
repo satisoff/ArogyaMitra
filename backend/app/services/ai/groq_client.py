@@ -1,55 +1,56 @@
-import json
-import logging
 import os
-
 import requests
 
-logger = logging.getLogger(__name__)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 
-def generate_structured_workout_outline(prompt: str) -> dict:
-    """Call Groq chat completion API and return parsed JSON outline."""
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        raise RuntimeError("GROQ_API_KEY is not set")
+def call_groq_json(payload: dict) -> dict:
+    """
+    Generic Groq transport layer.
+    No schema assumptions.
+    Returns parsed JSON.
+    """
 
-    payload = {
-        "model": GROQ_MODEL,
-        "temperature": 0.2,
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You are a workout planning assistant. "
-                    "Return JSON only. Do not include markdown or extra text."
-                ),
-            },
-            {"role": "user", "content": prompt},
-        ],
-        "response_format": {"type": "json_object"},
-    }
+    if not GROQ_API_KEY:
+        raise RuntimeError("Missing GROQ_API_KEY")
 
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json",
     }
 
-    logger.info("Calling Groq API for structured workout outline")
-    response = requests.post(
-        GROQ_API_URL,
-        headers=headers,
-        json=payload,
-        timeout=30,
-    )
+    body = {
+        "model": GROQ_MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a strict JSON generator. Return valid JSON only."
+            },
+            {
+                "role": "user",
+                "content": str(payload)
+            }
+        ],
+        "temperature": 0.3,
+    }
+
+    response = requests.post(GROQ_URL, headers=headers, json=body, timeout=20)
     response.raise_for_status()
+
+    import json
+    import re
 
     data = response.json()
     content = data["choices"][0]["message"]["content"]
 
-    if isinstance(content, dict):
-        return content
+    # Remove ```json ``` or ``` wrappers
+    content = content.strip()
+
+    if content.startswith("```"):
+        content = re.sub(r"^```[a-zA-Z]*", "", content)
+        content = content.rstrip("```").strip()
 
     return json.loads(content)

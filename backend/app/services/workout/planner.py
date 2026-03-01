@@ -3,6 +3,7 @@ from app.models.user import User
 from app.services.ai.planner import generate_ai_workout_outline
 from app.services.workout.adaptive_engine import adapt_workout_plan
 from app.services.tools.youtube_tool import search_youtube_video
+from app.services.external.youtube_service import search_youtube_video
 
 def _exercise_library(focus: str) -> list[str]:
     catalog = {
@@ -90,6 +91,20 @@ def _build_blocks(duration: int) -> list[dict]:
         {"name": "Main Session", "minutes": main},
         {"name": "Cool-down", "minutes": cooldown},
     ]
+    
+    
+def _attach_videos(exercises: list[str]) -> list[dict]:
+    videos = []
+
+    for ex in exercises:
+        video_url = search_youtube_video(f"{ex} proper form exercise")
+        videos.append({
+            "exercise": ex,
+            "youtube": video_url
+        })
+
+    return videos
+    
 
 def generate_workout_plan(
     user: User,
@@ -138,6 +153,7 @@ def generate_workout_plan(
             duration = _duration_from_intensity(intensity, profile)
 
             exercises = _exercise_from_notes(ai_day.get("notes"))
+            videos = _attach_videos(exercises)
 
             blocks = _build_blocks(duration)
 
@@ -148,6 +164,7 @@ def generate_workout_plan(
                 "duration_minutes": duration,
                 "exercises": exercises,
                 "blocks": blocks,
+                "videos": videos,
             })
 
         else:
@@ -161,6 +178,7 @@ def generate_workout_plan(
             workout_days.append({
                 "day": day_name,
                 **fallback_day,
+                "videos": videos,
             })
 
     base_plan = {
